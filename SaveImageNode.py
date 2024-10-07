@@ -28,9 +28,10 @@ class SaveImageNode:
             },
         }
 
-    RETURN_TYPES = ("IMAGE",)  # Define que este nodo devuelve un tipo de imagen
     FUNCTION = "save_images"
     OUTPUT_NODE = True
+    RETURN_TYPES = ("NONE",)
+    RETURN_NAMES = ("saved",)
     CATEGORY = "image"
 
     def generate_unique_filename(self, save_path, filename_prefix, padding_length, filename_delimiter, starting_number):
@@ -39,7 +40,7 @@ class SaveImageNode:
         while True:
             # Generar el número del archivo con padding
             number_str = str(counter).zfill(padding_length)  # Aplicar padding
-            file = f"{filename_prefix}{filename_delimiter}{number_str}.png"  # Nombre del archivo
+            file = f"{filename_prefix}{filename_delimiter}{number_str}_.png"  # Nombre del archivo
             full_path = os.path.join(save_path, file)  # Ruta completa del archivo
 
             # Verificar si el archivo ya existe en la carpeta designada
@@ -49,18 +50,19 @@ class SaveImageNode:
             counter += 1  # Incrementar el contador y continuar buscando
 
     def save_images(self, images, filename_number_padding="1", filename_prefix="image", 
-                    filename_delimiter="_", save_path="images/output", prompt=None, extra_pnginfo=None):
+                    filename_delimiter="_", save_path="", prompt=None, extra_pnginfo=None):
+        # Combine self.output_dir with save_path
+        full_save_path = os.path.join(self.output_dir, save_path.strip())
+
         # Convertir el padding de cadena a entero
         try:
-            padding_length = int(filename_number_padding)  # Convertir a entero
+            padding_length = int(filename_number_padding)
         except ValueError:
-            padding_length = 1  # Valor predeterminado en caso de error de conversión
+            padding_length = 1
 
         # Crear la carpeta si no existe
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
-
-        results = []  # Colecciona resultados para la salida
+        if not os.path.exists(full_save_path):
+            os.makedirs(full_save_path)
 
         for image in images:
             i = 255. * image.cpu().numpy()
@@ -76,19 +78,11 @@ class SaveImageNode:
                         metadata.add_text(x, json.dumps(extra_pnginfo[x]))
 
             # Generar un nombre de archivo único, comenzando desde 1
-            full_path = self.generate_unique_filename(save_path, filename_prefix, padding_length, filename_delimiter, starting_number=1)
+            full_path = self.generate_unique_filename(full_save_path, filename_prefix, padding_length, filename_delimiter, starting_number=1)
 
-            img.save(full_path, pnginfo=metadata, compress_level=4)
+            img.save("/home/vertex/Downloads/test.png", pnginfo=metadata, compress_level=4)
 
-            # Almacena resultados para la salida
-            results.append({
-                "filename": os.path.basename(full_path),  # Solo el nombre del archivo
-                "subfolder": save_path,
-                "type": self.type
-            })
-
-        # Retorna las rutas de las imágenes guardadas como salida
-        return {"ui": {"images": results}}
+        return (None, )
 
 # Un diccionario que contiene todos los nodos que deseas exportar con sus nombres
 NODE_CLASS_MAPPINGS = {
