@@ -1,0 +1,14 @@
+[project]
+name = "roblox-comfyui-nodes"
+description = "NODES:Scale Image Node, Switch Image Node, Switch Text Node, First Number Node, Mirror Effect Node, Text To ImageNode, Flow Nodes, Simple Save Image Node"
+version = "1.0.0"
+license = {file = "LICENSE"}
+
+[project.urls]
+Repository = "https://github.com/VertexStudio/roblox-comfyui-nodes"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = ""
+DisplayName = "roblox-comfyui-nodes"
+Icon = ""
